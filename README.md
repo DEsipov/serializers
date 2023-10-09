@@ -5,6 +5,9 @@ git clone git@github.com:DEsipov/serializers.git
 
 1. Создать вирт. окружение.
 
+1. Обновить pip
+python -m pip install --upgrade pip
+
 1. Установить зависимости из requirements.txt
 pip install -r requirements.txt
 

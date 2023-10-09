@@ -2,8 +2,13 @@ from django.urls import include, path
 from rest_framework.authtoken import views
 from rest_framework.routers import DefaultRouter
 
+from api.views import IngredientViewSet, SmokeViewSet
 
 v1_router = DefaultRouter()
+
+
+v1_router.register('ingredients', IngredientViewSet, basename='ingredients')
+v1_router.register('smoke', SmokeViewSet, basename='smoke')
 # v1_router.register('recipes', PostViewSet, basename='posts')
 # v1_router.register(
 #     r'posts/(?P<post_id>\d+)/comments',
