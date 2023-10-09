@@ -28,3 +28,9 @@ pip install -r requirements.txt
 
 
 #### Полезные ссылки
+
+Шпора 
+https://docs.google.com/document/d/195C3crfvMDfxL7GSxoKYyj1Pfnfx8zyPoEtmMD8JZQE/edit#heading=h.oe06q2t0a6zt
+
+Доки сериализаторы
+https://www.django-rest-framework.org/api-guide/serializers/

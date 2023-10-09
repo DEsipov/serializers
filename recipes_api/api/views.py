@@ -15,6 +15,7 @@ class IngredientViewSet(ModelViewSet):
     http_method_names = ['get']
 
     def get_queryset(self):
+        # Пример, как доставать параметры из url, и использовать их.
         qs = Ingredient.objects.all()
         name = self.request.query_params.get('name')
         if name:

@@ -1,12 +1,8 @@
 # TODO
 
-# Обычные поля, текcт, строка, число, время-дата, slug.
-
 # Связанные поле. Related.
 
 # Поля m2m.
-
-# Валидация в сериализаторах.
 
 # Получение kwargs и флильтр
 from rest_framework import serializers
@@ -15,8 +11,20 @@ from recipes.models import Ingredient, Smoke
 
 
 class SimpleSmokeSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    email = serializers.EmailField()
+    """Обычный сериализатор для объекта, сырой, без заморочек."""
+    name = serializers.CharField(max_length=32)
+    count = serializers.IntegerField(required=False)
+
+    def create(self, validated_data):
+        """Meтод создания объекта из данных"""
+        return Smoke(**validated_data)
+
+    def update(self, instance, validated_data):
+        # Метод обновления объекта.
+        instance.name = validated_data.get('name', instance.name)
+        instance.count = validated_data.get('count', instance.count)
+        instance.save()
+        return instance
 
 
 class SmokeSerializer(serializers.ModelSerializer):
@@ -31,7 +39,26 @@ class SmokeSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    # Отдельная валидация, вне зависимости от модели.
+    name = serializers.CharField(max_length=32, verbose_name='Название')
 
     class Meta:
         model = Ingredient
         fields = '__all__'
+
+    def validate_name(self, value):
+        """Валидация на уровене поля."""
+        if value == 'sugar':
+            raise serializers.ValidationError('sugar is evil')
+        return value
+
+    def validate(self, data):
+        """Валидация на уровне объекта."""
+        name = data.get('name')
+        unit = data.get('measurement_unit')
+
+        if name == 'salt' and not unit == 'km':
+            raise serializers.ValidationError('Not Good!')
+        return data
+
+

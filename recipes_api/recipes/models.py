@@ -10,6 +10,9 @@ class Smoke(models.Model):
     count = models.PositiveSmallIntegerField()
     created = models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
