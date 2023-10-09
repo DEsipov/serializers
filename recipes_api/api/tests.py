@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from api.serializers import SimpleSmokeSerializer
-from recipes.models import Ingredient, Smoke
+from recipes.models import Ingredient, Smoke, Tag, RecipeIngredient, Recipe
 
 User = get_user_model()
 
@@ -118,3 +118,46 @@ class TestCaseIngredient(TestCase):
         # [OrderedDict(
         # [('id', 1), ('name', 'salt'), ('measurement_unit', 'gr')])
         # ]
+
+
+class RecipeTestCase(TestCase):
+
+    def setUp(self) -> None:
+        self.client = Client()
+        self.user = User.objects.create_user(username='admin')
+        self.ingredient = Ingredient.objects.create(
+            # !!! Так делать фу, бяка, плохо !!! Только в целях демонстрации.
+            id=1488,
+            name='salt',
+            measurement_unit='gr',
+        )
+        self.recipe = Recipe.objects.create(
+            name='soup',
+            author=self.user,
+            text='some_text'
+        )
+        self.tag = Tag.objects.create(name='black', slug='white')
+        self.recipe.tags.add(self.tag)
+        self.ingredient_recipe = RecipeIngredient.objects.create(
+            recipe=self.recipe,
+            ingredient=self.ingredient,
+            amount=100,
+        )
+        self.client.force_login(user=self.user)
+
+    def test_list(self):
+        url = reverse('recipes-list')
+
+        resp = self.client.get(url)
+
+        item = resp.data[0]
+        print(item)
+
+        tags = item.get('tags')
+        print(tags)
+
+        ingredients = item.get('ingredients')
+        print(ingredients[0])
+        # Здесь будет id объекта Ingredient.
+        print(ingredients[0].get('id'))
+        print(self.ingredient.id)

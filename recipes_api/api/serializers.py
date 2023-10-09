@@ -7,7 +7,7 @@
 # Получение kwargs и флильтр
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Smoke
+from recipes.models import Ingredient, Smoke, Tag, RecipeIngredient, Recipe
 
 
 class SimpleSmokeSerializer(serializers.Serializer):
@@ -40,7 +40,7 @@ class SmokeSerializer(serializers.ModelSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
     # Отдельная валидация, вне зависимости от модели.
-    name = serializers.CharField(max_length=32, verbose_name='Название')
+    name = serializers.CharField(max_length=32)
 
     class Meta:
         model = Ingredient
@@ -62,3 +62,40 @@ class IngredientSerializer(serializers.ModelSerializer):
         return data
 
 
+####### Сериализатор внутри сериализатора
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField(
+        source='ingredient.name'
+    )
+    measurement_unit = serializers.StringRelatedField(
+        source='ingredient.measurement_unit'
+    )
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient',
+        queryset=Ingredient.objects.all()
+    )
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ('amount', 'name', 'measurement_unit', 'id')
+
+
+class RecipeListSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения списка рецептов."""
+    ingredients = serializers.SerializerMethodField()
+    tags = TagSerializer(many=True)
+
+    def get_ingredients(self, obj):
+        return RecipeIngredientSerializer(
+            RecipeIngredient.objects.filter(recipe=obj).all(), many=True
+        ).data
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'

@@ -1,7 +1,8 @@
 from rest_framework.viewsets import ModelViewSet
 
-from api.serializers import IngredientSerializer, SmokeSerializer
-from recipes.models import Ingredient, Smoke
+from api.serializers import (IngredientSerializer, SmokeSerializer,
+                             RecipeListSerializer)
+from recipes.models import Ingredient, Smoke, Recipe
 
 
 class SmokeViewSet(ModelViewSet):
@@ -21,3 +22,8 @@ class IngredientViewSet(ModelViewSet):
         if name:
             qs = qs.filter(name__istartswith=name)
         return qs.all()
+
+
+class RecipesViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeListSerializer
