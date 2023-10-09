@@ -7,7 +7,8 @@
 # Получение kwargs и флильтр
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Smoke, Tag, RecipeIngredient, Recipe
+from recipes.models import (Ingredient, Smoke, Tag, RecipeIngredient, Recipe,
+                            User)
 
 
 class SimpleSmokeSerializer(serializers.Serializer):
@@ -90,6 +91,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения списка рецептов."""
     ingredients = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
+    # PrimaryKeyRelatedField это по умолчанию.
+    # author = serializers.StringRelatedField()
+    author = serializers.SlugRelatedField(slug_field='first_name',
+                                          queryset=User.objects.all())
 
     def get_ingredients(self, obj):
         return RecipeIngredientSerializer(

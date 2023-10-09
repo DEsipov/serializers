@@ -124,7 +124,8 @@ class RecipeTestCase(TestCase):
 
     def setUp(self) -> None:
         self.client = Client()
-        self.user = User.objects.create_user(username='admin')
+        self.user = User.objects.create_user(username='admin',
+                                             first_name='Anton')
         self.ingredient = Ingredient.objects.create(
             # !!! Так делать фу, бяка, плохо !!! Только в целях демонстрации.
             id=1488,
@@ -161,3 +162,6 @@ class RecipeTestCase(TestCase):
         # Здесь будет id объекта Ingredient.
         print(ingredients[0].get('id'))
         print(self.ingredient.id)
+
+        # Автор.
+        print(item.get('author'))
