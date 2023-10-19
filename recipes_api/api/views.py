@@ -1,8 +1,9 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from api.serializers import (IngredientSerializer, SmokeSerializer,
-                             RecipeListSerializer)
-from recipes.models import Ingredient, Smoke, Recipe
+                             RecipeListSerializer, TagSerializer)
+from recipes.models import Ingredient, Smoke, Recipe, Tag
 
 
 class SmokeViewSet(ModelViewSet):
@@ -27,3 +28,10 @@ class IngredientViewSet(ModelViewSet):
 class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeListSerializer
+    permission_classes = [IsAuthenticated, ]
+
+
+class TagViewSet(ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [IsAuthenticated, ]

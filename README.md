@@ -23,7 +23,22 @@ pip install -r requirements.txt
 ./manage.py runserver
 
 
-#### Все самое главное о сериализаторах
+#### Как изспользовать http-запросы pycharm.
+
+
+###### Создать токен, см. тест api.tests.RecipeTestCase.setUpClass
+
+```python
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+
+user = User.objects.get()
+token, _ = Token.objects.get_or_create(user=user)
+print(token.key)
+```
+
+###### Подставить token.key в заголовк Token.
+Authorization: Token 0c73436bd884a502b6ea710cace9a5e633e0358b
 
 
 

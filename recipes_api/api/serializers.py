@@ -31,12 +31,12 @@ class SimpleSmokeSerializer(serializers.Serializer):
 class SmokeSerializer(serializers.ModelSerializer):
     """Сериазайзер для обычной модели."""
     # Какой формат здесь укажем, такой и будет в данных.
-    count = serializers.CharField()
+    # name = serializers.CharField(max_length=3)
 
     class Meta:
         model = Smoke
+        # exclude = ('id', )
         fields = '__all__'
-        excludes = ('id', )
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -90,17 +90,20 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения списка рецептов."""
     ingredients = serializers.SerializerMethodField()
-    tags = TagSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(many=True,
+                                              queryset=Tag.objects.all())
     # PrimaryKeyRelatedField это по умолчанию.
-    # author = serializers.StringRelatedField()
-    author = serializers.SlugRelatedField(slug_field='first_name',
-                                          queryset=User.objects.all())
+    # Это по желанию.
+    author = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        required=False)
 
     def get_ingredients(self, obj):
-        return RecipeIngredientSerializer(
-            RecipeIngredient.objects.filter(recipe=obj).all(), many=True
-        ).data
+        qs = RecipeIngredient.objects.filter(recipe=obj).all()
+        return RecipeIngredientSerializer(qs, many=True).data
 
     class Meta:
         model = Recipe
         fields = '__all__'
+        # Можно указать поле, только для чтения.
+        # read_only = ('author', )

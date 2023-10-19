@@ -1,0 +1,38 @@
+### Create Tag
+POST http://localhost:8000/api/v1/tags/
+Accept: application/json
+Cache-Control: no-cache
+Authorization: Token 0c73436bd884a502b6ea710cace9a5e633e0358b
+
+{
+"name": "Завтрак",
+"slug": "break"
+}
+
+
+### GET Tags
+GET http://localhost:8000/api/v1/tags/
+Accept: application/json
+Cache-Control: no-cache
+Authorization: Token 0c73436bd884a502b6ea710cace9a5e633e0358b
+
+
+### Create Recipe
+POST http://localhost:8000/api/v1/recipes/
+Accept: application/json
+Cache-Control: no-cache
+Authorization: Token 0c73436bd884a502b6ea710cace9a5e633e0358b
+
+{
+"name": "Медовуха",
+"text": "Сварить",
+"tags": [1],
+"author": 1
+}
+
+
+### Recipes
+GET http://localhost:8000/api/v1/recipes/
+Accept: application/json
+Cache-Control: no-cache
+Authorization: Token 0c73436bd884a502b6ea710cace9a5e633e0358b

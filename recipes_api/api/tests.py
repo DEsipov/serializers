@@ -2,6 +2,9 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from api.serializers import SimpleSmokeSerializer
 from recipes.models import Ingredient, Smoke, Tag, RecipeIngredient, Recipe
@@ -26,9 +29,9 @@ class SmokeTestCase(TestCase):
         data = {'name': 'some_name', 'count': 22}
         serializer = SimpleSmokeSerializer(data=data)
         is_valid = serializer.is_valid()
-        # Результат валидация,True или False
+        # # Результат валидация,True или False
         print(is_valid)
-        # Здесь будут ошибки, при их наличии.
+        # # Здесь будут ошибки, при их наличии.
         print(serializer.errors)
         smoke = serializer.save()
         print(smoke)
@@ -63,6 +66,8 @@ class SmokeTestCase(TestCase):
         print(resp.data)
         # [OrderedDict([('id', 1), ('name', 'one'), ('count', 3),
         # ('created', '2023-10-09')])]
+        print(resp.data[0])
+        print(resp.data[0].get('name'))
 
     def test_create(self):
         url = reverse('smoke-list')
@@ -122,6 +127,22 @@ class TestCaseIngredient(TestCase):
 
 class RecipeTestCase(TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Создаем клиента, с токеном.
+        cls.admin = User.objects.create(username='lauren', email='l@l.ru')
+        token, _ = Token.objects.get_or_create(user=cls.admin)
+
+        # Авторизируем его.
+        cls.client_admin = APIClient()
+        cls.client_admin.force_authenticate(user=cls.admin,
+                                            token=cls.admin.auth_token)
+
+        # Тэги
+        cls.tag = Tag.objects.create(name='обед', slug='dinner')
+
     def setUp(self) -> None:
         self.client = Client()
         self.user = User.objects.create_user(username='admin',
@@ -146,22 +167,60 @@ class RecipeTestCase(TestCase):
         )
         self.client.force_login(user=self.user)
 
-    def test_list(self):
+    def test_list_auth_serializer(self):
+        """Тест для наглядной работы сериалайзера."""
+        url = reverse('recipes-list')
+
+        resp = self.client_admin.get(url)
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Ниже printЫ, чтобы посмотреть работу сериализаторов.
+        # item = resp.data[0]
+
+        # tags = item.get('tags')
+        # print(tags)
+
+        # ingredients = item.get('ingredients')
+        # print(ingredients[0])
+
+        # Здесь будет id объекта Ingredient.
+        # print(ingredients[0].get('id'))
+        # print(self.ingredient.id)
+
+        # Автор.
+        # print(item.get('author'))
+
+    def test_list_not_auth(self):
+        """Проверяем работу закрытого api для неавториз. пользователя."""
         url = reverse('recipes-list')
 
         resp = self.client.get(url)
 
-        item = resp.data[0]
-        print(item)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        tags = item.get('tags')
-        print(tags)
+    def test_list_auth(self):
+        """Проверяем работу закрытого api для авторизован. пользователя."""
+        url = reverse('recipes-list')
 
-        ingredients = item.get('ingredients')
-        print(ingredients[0])
-        # Здесь будет id объекта Ingredient.
-        print(ingredients[0].get('id'))
-        print(self.ingredient.id)
+        resp = self.client_admin.get(url)
 
-        # Автор.
-        print(item.get('author'))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        expected = resp.data[0].get('id')
+        self.assertEqual(self.recipe.id, expected)
+
+    def test_create_recipe(self):
+        url = reverse('recipes-list')
+        data = {
+            "name": "Медовуха",
+            "text": "Сварить",
+            "tags": [self.tag.pk],
+            "author": self.admin.pk,
+        }
+
+        resp = self.client_admin.post(url, data=data)
+
+        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        print(resp)
+        print(resp.data)
+
