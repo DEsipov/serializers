@@ -209,6 +209,16 @@ class RecipeTestCase(TestCase):
         expected = resp.data[0].get('id')
         self.assertEqual(self.recipe.id, expected)
 
+    def test_detail(self):
+        """Инфа о конкретном объекте."""
+        url = reverse('recipes-detail', args=(self.recipe.pk,))
+
+        resp = self.client_admin.get(url)
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.recipe.id, resp.data.get('id'))
+        print(resp.data)
+
     def test_create_recipe(self):
         url = reverse('recipes-list')
         data = {
@@ -220,7 +230,19 @@ class RecipeTestCase(TestCase):
 
         resp = self.client_admin.post(url, data=data)
 
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        print(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         print(resp.data)
 
+    def test_update_recipe(self):
+        """Тест обновления рецепта."""
+        url = reverse('recipes-detail', args=(self.recipe.pk,))
+        data = {
+            "name": "Медовуха",
+            "text": "Сварганить"
+        }
+
+        resp = self.client_admin.put(url, data=data)
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data.get('name'), data['name'])
+        print(resp.data)
