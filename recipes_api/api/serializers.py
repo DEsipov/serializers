@@ -8,7 +8,7 @@
 from rest_framework import serializers
 
 from recipes.models import (Ingredient, Smoke, Tag, RecipeIngredient, Recipe,
-                            User)
+                            User, Favorite)
 
 
 class SimpleSmokeSerializer(serializers.Serializer):
@@ -90,8 +90,13 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения списка рецептов."""
     ingredients = serializers.SerializerMethodField()
-    tags = serializers.PrimaryKeyRelatedField(many=True,
-                                              queryset=Tag.objects.all())
+    # tags = serializers.PrimaryKeyRelatedField(many=True,
+    #                                           queryset=Tag.objects.all())
+    # tags = serializers.SlugRelatedField(many=True, slug_field='slug',
+    #                                     queryset=Tag.objects.all())
+
+    tags = TagSerializer(many=True)
+
     # PrimaryKeyRelatedField это по умолчанию.
     # Это по желанию.
     author = serializers.PrimaryKeyRelatedField(
@@ -107,3 +112,27 @@ class RecipeListSerializer(serializers.ModelSerializer):
         fields = '__all__'
         # Можно указать поле, только для чтения.
         # read_only = ('author', )
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        # read_only=True,
+    )
+    user_slug = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username',
+        source='user',
+        # read_only=True,
+    )
+    user_string = serializers.StringRelatedField(
+        # queryset=User.objects.all(),
+        source='user',
+    )
+
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+        # Можно указать поле, только для чтения.
+        # read_only = ('user', 'user_slug')
+        # read_only = ('user', )

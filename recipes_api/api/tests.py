@@ -7,7 +7,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from api.serializers import SimpleSmokeSerializer
-from recipes.models import Ingredient, Smoke, Tag, RecipeIngredient, Recipe
+from recipes.models import (Ingredient, Smoke, Tag, RecipeIngredient, Recipe,
+                            Favorite)
 
 User = get_user_model()
 
@@ -158,8 +159,12 @@ class RecipeTestCase(TestCase):
             author=self.user,
             text='some_text'
         )
-        self.tag = Tag.objects.create(name='black', slug='white')
+        self.tag = Tag.objects.create(name='black', slug='black')
+        self.tag2 = Tag.objects.create(name='white', slug='white')
+
         self.recipe.tags.add(self.tag)
+        self.recipe.tags.add(self.tag2)
+
         self.ingredient_recipe = RecipeIngredient.objects.create(
             recipe=self.recipe,
             ingredient=self.ingredient,
@@ -246,3 +251,38 @@ class RecipeTestCase(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.data.get('name'), data['name'])
         print(resp.data)
+
+
+class FavoriteTestCase(TestCase):
+
+    def setUp(self) -> None:
+        # Создаем клиента, с токеном.
+        self.admin = User.objects.create(username='lauren',
+                                         email='l@l.ru')
+        token, _ = Token.objects.get_or_create(user=self.admin)
+
+        # Авторизируем его.
+        self.client_admin = APIClient()
+        self.client_admin.force_authenticate(user=self.admin,
+                                             token=self.admin.auth_token)
+
+        self.client_auth = Client()
+        self.recipe = Recipe.objects.create(
+            name='soup',
+            author=self.admin,
+            text='some_text'
+        )
+        self.favorite = Favorite.objects.create(
+            recipe=self.recipe,
+            user=self.admin,
+        )
+
+    def test_list(self):
+        url = reverse('favorites-list')
+        print(url)
+        # /api/v1/favorites/
+
+        resp = self.client_admin.get(url)
+
+        print(resp.data)
+        print(resp.data[0]['user'])
