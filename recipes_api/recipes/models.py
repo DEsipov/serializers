@@ -59,7 +59,8 @@ class Recipe(models.Model):
         Ingredient,
         through='RecipeIngredient',
         through_fields=('recipe', 'ingredient'),
-        verbose_name='Ингредиенты')
+        verbose_name='Ингредиенты',
+    )
     tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
@@ -72,7 +73,9 @@ class Recipe(models.Model):
 
 class RecipeIngredient(models.Model):
     amount = models.PositiveIntegerField(
-        verbose_name='Количество'
+        verbose_name='Количество',
+        blank=True,
+        null=True,
     )
     ingredient = models.ForeignKey(
         Ingredient,

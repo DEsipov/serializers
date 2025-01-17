@@ -22,7 +22,6 @@ class SmokeTestCase(TestCase):
 
     def test_simple_serializer(self):
         serializer = SimpleSmokeSerializer(self.smoke)
-
         # Сериализация.
         print(serializer.data)
 
